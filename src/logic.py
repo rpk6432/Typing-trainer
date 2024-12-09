@@ -6,3 +6,6 @@ def load_texts(file_path):
 
 def count_errors(original, user_input):
     return sum(1 for i, char in enumerate(user_input) if i < len(original) and char != original[i])
+
+def calculate_speed(char_count, time_taken):
+    return (char_count / time_taken) * 60

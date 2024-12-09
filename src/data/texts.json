@@ -1,0 +1,5 @@
+{
+  "easy": ["Hello world."],
+  "medium": ["Typing speed is measured in WPM."],
+  "hard": ["The quick brown fox jumps over the lazy dog."]
+}

@@ -14,11 +14,11 @@ A simple typing trainer to improve your typing speed and accuracy.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/typing-trainer.git
+   git clone https://github.com/rpk6432/typing-trainer.git
    cd typing-trainer
    ```
 
-2. Make sure Python 3.6+ is installed.
+2. Make sure Python 3.10+ is installed.
 
 3. Run the program:
    ```bash

@@ -22,7 +22,9 @@ class TypingTrainerGUI(QWidget):
 
         self.instruction_label = QLabel("Select a difficulty level:")
         layout.addWidget(self.instruction_label)
-
+        self.target_text_label = QLabel("")
+        self.target_text_label.setWordWrap(True)
+        layout.addWidget(self.target_text_label)
         self.easy_button = QPushButton("Easy")
         self.medium_button = QPushButton("Medium")
         self.hard_button = QPushButton("Hard")
@@ -30,7 +32,6 @@ class TypingTrainerGUI(QWidget):
         self.easy_button.clicked.connect(lambda: self.start_training("easy"))
         self.medium_button.clicked.connect(lambda: self.start_training("medium"))
         self.hard_button.clicked.connect(lambda: self.start_training("hard"))
-
         layout.addWidget(self.easy_button)
         layout.addWidget(self.medium_button)
         layout.addWidget(self.hard_button)
@@ -49,8 +50,8 @@ class TypingTrainerGUI(QWidget):
 
     def start_training(self, difficulty):
         self.current_text = self.texts[difficulty][0]
-        self.instruction_label.setText("Type the following text:")
-        self.text_area.setPlainText(self.current_text)
+        self.target_text_label.setText(self.current_text)  # Display text in a label
+        self.instruction_label.setText("Type the text shown above:")
         self.text_area.setDisabled(False)
         self.text_area.setFocus()
         self.submit_button.setDisabled(False)
@@ -75,4 +76,5 @@ class TypingTrainerGUI(QWidget):
         self.text_area.setPlainText("")
         self.text_area.setDisabled(True)
         self.submit_button.setDisabled(True)
+        self.target_text_label.setText("")
         self.instruction_label.setText("Select a difficulty level:")

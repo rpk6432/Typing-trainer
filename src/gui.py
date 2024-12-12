@@ -2,6 +2,7 @@ import time
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QTextEdit, QMessageBox
 )
+from PyQt5.QtCore import Qt
 from logic import load_texts, count_errors, calculate_speed
 
 
@@ -16,15 +17,61 @@ class TypingTrainerGUI(QWidget):
 
     def init_ui(self):
         self.setWindowTitle("Typing Trainer")
-        self.setGeometry(100, 100, 400, 300)
+        self.setGeometry(100, 100, 600, 400)
+
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #2b2b2b;
+                color: #f0f0f0;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+            }
+            QPushButton {
+                background-color: #444;
+                color: #f0f0f0;
+                border: none;
+                border-radius: 10px;
+                padding: 10px 20px;
+            }
+            QPushButton:hover {
+                background-color: #555;
+            }
+            QPushButton:pressed {
+                background-color: #333;
+            }
+            QTextEdit {
+                background-color: #3a3a3a;
+                color: #f0f0f0;
+                border: 1px solid #444;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QLabel {
+                color: #f0f0f0;
+            }
+            QLabel#targetText {
+                font-size: 18px;
+                font-weight: bold;
+                color: #f0f0f0;
+                background-color: #444;
+                border: 2px solid #555;
+                border-radius: 5px;
+                padding: 10px;
+                text-align: center;
+            }
+        """)
 
         layout = QVBoxLayout()
 
         self.instruction_label = QLabel("Select a difficulty level:")
-        layout.addWidget(self.instruction_label)
+        layout.addWidget(self.instruction_label, alignment=Qt.AlignCenter)
+
         self.target_text_label = QLabel("")
+        self.target_text_label.setObjectName("targetText")
         self.target_text_label.setWordWrap(True)
+        self.target_text_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.target_text_label)
+
         self.easy_button = QPushButton("Easy")
         self.medium_button = QPushButton("Medium")
         self.hard_button = QPushButton("Hard")
@@ -32,6 +79,7 @@ class TypingTrainerGUI(QWidget):
         self.easy_button.clicked.connect(lambda: self.start_training("easy"))
         self.medium_button.clicked.connect(lambda: self.start_training("medium"))
         self.hard_button.clicked.connect(lambda: self.start_training("hard"))
+
         layout.addWidget(self.easy_button)
         layout.addWidget(self.medium_button)
         layout.addWidget(self.hard_button)

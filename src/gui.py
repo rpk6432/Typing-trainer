@@ -45,6 +45,7 @@ class TypingTrainerGUI(QWidget):
                 border: 1px solid #444;
                 border-radius: 5px;
                 padding: 5px;
+                font-size: 16px;
             }
             QLabel {
                 color: #f0f0f0;
@@ -67,9 +68,9 @@ class TypingTrainerGUI(QWidget):
         layout.addWidget(self.instruction_label, alignment=Qt.AlignCenter)
 
         self.target_text_label = QLabel("")
-        self.target_text_label.setObjectName("targetText")
-        self.target_text_label.setWordWrap(True)
-        self.target_text_label.setAlignment(Qt.AlignCenter)
+        self.target_text_label.setObjectName("targetText")  # Apply the custom style
+        self.target_text_label.setWordWrap(True)  # Allow text wrapping
+        self.target_text_label.setAlignment(Qt.AlignCenter)  # Center the text
         layout.addWidget(self.target_text_label)
 
         self.easy_button = QPushButton("Easy")
@@ -87,12 +88,8 @@ class TypingTrainerGUI(QWidget):
         self.text_area = QTextEdit()
         self.text_area.setPlaceholderText("Start typing here...")
         self.text_area.setDisabled(True)
+        self.text_area.textChanged.connect(self.check_input)
         layout.addWidget(self.text_area)
-
-        self.submit_button = QPushButton("Submit")
-        self.submit_button.setDisabled(True)
-        self.submit_button.clicked.connect(self.submit_text)
-        layout.addWidget(self.submit_button)
 
         self.setLayout(layout)
 
@@ -102,27 +99,49 @@ class TypingTrainerGUI(QWidget):
         self.instruction_label.setText("Type the text shown above:")
         self.text_area.setDisabled(False)
         self.text_area.setFocus()
-        self.submit_button.setDisabled(False)
         self.start_time = time.time()
 
-    def submit_text(self):
+    def check_input(self):
         user_input = self.text_area.toPlainText()
-        elapsed_time = time.time() - self.start_time
+        target_text = self.current_text
 
-        errors = count_errors(self.current_text, user_input)
-        speed = calculate_speed(len(user_input), elapsed_time)
+        if not target_text.startswith(user_input):
+            self.text_area.setStyleSheet("""
+                QTextEdit {
+                    background-color: #553333;
+                    color: #f0f0f0;
+                    border: 1px solid #ff5555;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-size: 16px;
+                }
+            """)
+        else:
+            self.text_area.setStyleSheet("""
+                QTextEdit {
+                    background-color: #3a3a3a;
+                    color: #f0f0f0;
+                    border: 1px solid #444;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-size: 16px;
+                }
+            """)
 
-        QMessageBox.information(
-            self,
-            "Results",
-            f"Errors: {errors}\nSpeed: {speed:.2f} characters per minute"
-        )
+        if user_input == target_text:
+            elapsed_time = time.time() - self.start_time
+            errors = count_errors(target_text, user_input)
+            speed = calculate_speed(len(user_input), elapsed_time)
 
-        self.reset_ui()
+            QMessageBox.information(
+                self,
+                "Results",
+                f"Errors: {errors}\nSpeed: {speed:.2f} characters per minute"
+            )
+            self.reset_ui()
 
     def reset_ui(self):
         self.text_area.setPlainText("")
         self.text_area.setDisabled(True)
-        self.submit_button.setDisabled(True)
         self.target_text_label.setText("")
         self.instruction_label.setText("Select a difficulty level:")

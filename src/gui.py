@@ -66,37 +66,44 @@ class TypingTrainerGUI(QWidget):
         self.start_time = None
 
     def check_input(self):
-        if self.start_time is None:
-            self.start_time = time.time()
-
         user_input = self.text_area.toPlainText()
-        target_text = self.remaining_text
+        target_text = self.current_text
 
         if target_text.startswith(user_input):
             self.text_area.setStyleSheet(CORRECT_INPUT_STYLE)
-            self.remaining_text = self.current_text[len(user_input):]
+            self.remaining_text = target_text[len(user_input):]
             self.update_target_text_display()
+
+            if self.remaining_text == "":
+                self.show_result()
         else:
             self.text_area.setStyleSheet(INCORRECT_INPUT_STYLE)
 
-        if self.remaining_text == "":
-            elapsed_time = time.time() - self.start_time
-            speed = calculate_speed(len(self.current_text), elapsed_time)
-
-            QMessageBox.information(
-                self,
-                "Result",
-                f"Speed: {speed:.2f} characters per minute"
-            )
-            self.reset_ui()
-        else:
+        if self.start_time is not None:
             elapsed_time = time.time() - self.start_time
             speed = calculate_speed(len(user_input), elapsed_time)
             self.speed_label.setText(f"Typing Speed: {speed:.2f} CPM")
 
+        if not user_input and self.start_time is not None:
+            self.start_time = None
+
+        if self.start_time is None and user_input:
+            self.start_time = time.time()
+
     def update_target_text_display(self):
         self.target_text_label.setStyleSheet(HIGHLIGHTED_TARGET_TEXT_STYLE)
         self.target_text_label.setText(self.remaining_text)
+
+    def show_result(self):
+        elapsed_time = time.time() - self.start_time
+        speed = calculate_speed(len(self.current_text), elapsed_time)
+
+        QMessageBox.information(
+            self,
+            "Result",
+            f"Speed: {speed:.2f} characters per minute"
+        )
+        self.reset_ui()
 
     def reset_ui(self):
         self.text_area.setPlainText("")

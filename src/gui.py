@@ -2,8 +2,9 @@ import time
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QTextEdit, QMessageBox
 )
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt
 from logic import load_texts, calculate_speed
+from styles import MAIN_STYLE, INCORRECT_INPUT_STYLE, CORRECT_INPUT_STYLE
 
 
 class TypingTrainerGUI(QWidget):
@@ -12,58 +13,13 @@ class TypingTrainerGUI(QWidget):
         self.texts = load_texts("data/texts.json")
         self.current_text = ""
         self.start_time = None
-        self.typing_started = False
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_speed)
 
         self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle("Typing Trainer")
         self.setGeometry(100, 100, 600, 400)
-
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #2b2b2b;
-                color: #f0f0f0;
-                font-family: Arial, sans-serif;
-                font-size: 14px;
-            }
-            QPushButton {
-                background-color: #444;
-                color: #f0f0f0;
-                border: none;
-                border-radius: 10px;
-                padding: 10px 20px;
-            }
-            QPushButton:hover {
-                background-color: #555;
-            }
-            QPushButton:pressed {
-                background-color: #333;
-            }
-            QTextEdit {
-                background-color: #3a3a3a;
-                color: #f0f0f0;
-                border: 1px solid #444;
-                border-radius: 5px;
-                padding: 5px;
-                font-size: 16px;
-            }
-            QLabel {
-                color: #f0f0f0;
-            }
-            QLabel#targetText {
-                font-size: 18px;
-                font-weight: bold;
-                color: #f0f0f0;
-                background-color: #444;
-                border: 2px solid #555;
-                border-radius: 5px;
-                padding: 10px;
-                text-align: center;
-            }
-        """)
+        self.setStyleSheet(MAIN_STYLE)
 
         layout = QVBoxLayout()
 
@@ -94,8 +50,8 @@ class TypingTrainerGUI(QWidget):
         self.text_area.textChanged.connect(self.check_input)
         layout.addWidget(self.text_area)
 
-        self.speed_label = QLabel("Typing speed: 0 CPM")
-        layout.addWidget(self.speed_label)
+        self.speed_label = QLabel("Typing Speed: 0 CPM")
+        layout.addWidget(self.speed_label, alignment=Qt.AlignCenter)
 
         self.setLayout(layout)
 
@@ -105,66 +61,39 @@ class TypingTrainerGUI(QWidget):
         self.instruction_label.setText("Type the text shown above:")
         self.text_area.setDisabled(False)
         self.text_area.setFocus()
-        self.typing_started = False
-        self.speed_label.setText("Typing speed: 0 CPM")
+        self.start_time = None
 
     def check_input(self):
+        if self.start_time is None:
+            self.start_time = time.time()
+
         user_input = self.text_area.toPlainText()
         target_text = self.current_text
 
-        if not self.typing_started and user_input:
-            self.typing_started = True
-            self.start_time = time.time()
-            self.timer.start(500)  # Update speed every 500 ms
-
         if not target_text.startswith(user_input):
-            self.text_area.setStyleSheet("""
-                QTextEdit {
-                    background-color: #553333;
-                    color: #f0f0f0;
-                    border: 1px solid #ff5555;
-                    border-radius: 5px;
-                    padding: 5px;
-                    font-size: 16px;
-                }
-            """)
+            self.text_area.setStyleSheet(INCORRECT_INPUT_STYLE)
         else:
-            self.text_area.setStyleSheet("""
-                QTextEdit {
-                    background-color: #3a3a3a;
-                    color: #f0f0f0;
-                    border: 1px solid #444;
-                    border-radius: 5px;
-                    padding: 5px;
-                    font-size: 16px;
-                }
-            """)
+            self.text_area.setStyleSheet(CORRECT_INPUT_STYLE)
 
         if user_input == target_text:
-            self.complete_training()
-
-    def complete_training(self):
-        self.timer.stop()
-        elapsed_time = time.time() - self.start_time
-        speed = calculate_speed(len(self.current_text), elapsed_time)
-
-        QMessageBox.information(
-            self,
-            "Result",
-            f"Speed: {speed:.2f} characters per minute"
-        )
-        self.reset_ui()
-
-    def update_speed(self):
-        if self.typing_started:
             elapsed_time = time.time() - self.start_time
-            user_input = self.text_area.toPlainText()
             speed = calculate_speed(len(user_input), elapsed_time)
-            self.speed_label.setText(f"Typing speed: {speed:.2f} CPM")
+
+            QMessageBox.information(
+                self,
+                "Result",
+                f"Speed: {speed:.2f} characters per minute"
+            )
+            self.reset_ui()
+        else:
+            if self.start_time is not None:
+                elapsed_time = time.time() - self.start_time
+                speed = calculate_speed(len(user_input), elapsed_time)
+                self.speed_label.setText(f"Typing Speed: {speed:.2f} CPM")
 
     def reset_ui(self):
         self.text_area.setPlainText("")
         self.text_area.setDisabled(True)
         self.target_text_label.setText("")
         self.instruction_label.setText("Select a difficulty level:")
-        self.speed_label.setText("Typing speed: 0 CPM")
+        self.speed_label.setText("Typing Speed: 0 CPM")

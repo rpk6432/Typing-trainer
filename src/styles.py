@@ -62,3 +62,16 @@ CORRECT_INPUT_STYLE = """
         font-size: 16px;
     }
 """
+
+HIGHLIGHTED_TARGET_TEXT_STYLE = """
+    QLabel#targetText {
+        font-size: 18px;
+        font-weight: bold;
+        color: #b3ffb3;
+        background-color: #444;
+        border: 2px solid #555;
+        border-radius: 5px;
+        padding: 10px;
+        text-align: center;
+    }
+"""

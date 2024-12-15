@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from logic import load_texts, calculate_speed
-from styles import MAIN_STYLE, INCORRECT_INPUT_STYLE, CORRECT_INPUT_STYLE
+from styles import MAIN_STYLE, INCORRECT_INPUT_STYLE, CORRECT_INPUT_STYLE, HIGHLIGHTED_TARGET_TEXT_STYLE
 
 
 class TypingTrainerGUI(QWidget):
@@ -12,6 +12,7 @@ class TypingTrainerGUI(QWidget):
         super().__init__()
         self.texts = load_texts("data/texts.json")
         self.current_text = ""
+        self.remaining_text = ""
         self.start_time = None
 
         self.init_ui()
@@ -57,6 +58,7 @@ class TypingTrainerGUI(QWidget):
 
     def start_training(self, difficulty):
         self.current_text = self.texts[difficulty][0]
+        self.remaining_text = self.current_text
         self.target_text_label.setText(self.current_text)
         self.instruction_label.setText("Type the text shown above:")
         self.text_area.setDisabled(False)
@@ -68,16 +70,18 @@ class TypingTrainerGUI(QWidget):
             self.start_time = time.time()
 
         user_input = self.text_area.toPlainText()
-        target_text = self.current_text
+        target_text = self.remaining_text
 
-        if not target_text.startswith(user_input):
-            self.text_area.setStyleSheet(INCORRECT_INPUT_STYLE)
-        else:
+        if target_text.startswith(user_input):
             self.text_area.setStyleSheet(CORRECT_INPUT_STYLE)
+            self.remaining_text = self.current_text[len(user_input):]
+            self.update_target_text_display()
+        else:
+            self.text_area.setStyleSheet(INCORRECT_INPUT_STYLE)
 
-        if user_input == target_text:
+        if self.remaining_text == "":
             elapsed_time = time.time() - self.start_time
-            speed = calculate_speed(len(user_input), elapsed_time)
+            speed = calculate_speed(len(self.current_text), elapsed_time)
 
             QMessageBox.information(
                 self,
@@ -86,10 +90,13 @@ class TypingTrainerGUI(QWidget):
             )
             self.reset_ui()
         else:
-            if self.start_time is not None:
-                elapsed_time = time.time() - self.start_time
-                speed = calculate_speed(len(user_input), elapsed_time)
-                self.speed_label.setText(f"Typing Speed: {speed:.2f} CPM")
+            elapsed_time = time.time() - self.start_time
+            speed = calculate_speed(len(user_input), elapsed_time)
+            self.speed_label.setText(f"Typing Speed: {speed:.2f} CPM")
+
+    def update_target_text_display(self):
+        self.target_text_label.setStyleSheet(HIGHLIGHTED_TARGET_TEXT_STYLE)
+        self.target_text_label.setText(self.remaining_text)
 
     def reset_ui(self):
         self.text_area.setPlainText("")
@@ -97,3 +104,5 @@ class TypingTrainerGUI(QWidget):
         self.target_text_label.setText("")
         self.instruction_label.setText("Select a difficulty level:")
         self.speed_label.setText("Typing Speed: 0 CPM")
+        self.current_text = ""
+        self.remaining_text = ""

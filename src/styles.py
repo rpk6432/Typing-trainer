@@ -75,3 +75,34 @@ HIGHLIGHTED_TARGET_TEXT_STYLE = """
         text-align: center;
     }
 """
+
+SYSTEM_MENU_STYLE = """
+    QPushButton#closeButton, QPushButton#minimizeButton, QPushButton#maximizeButton {
+        border: none;
+        border-radius: 6px;
+    }
+
+    QPushButton#closeButton {
+        background-color: #FF605C;
+    }
+    QPushButton#closeButton:hover {
+        background-color: #FF3B30;
+    }
+
+    QPushButton#minimizeButton {
+        background-color: #FFBD44;
+    }
+    QPushButton#minimizeButton:hover {
+        background-color: #F4AF41;
+    }
+
+    QPushButton#maximizeButton {
+        background-color: #28C940;
+    }
+    QPushButton#maximizeButton:hover {
+        background-color: #1F9E33;
+    }
+"""
+
+
+

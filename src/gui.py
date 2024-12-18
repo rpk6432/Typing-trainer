@@ -1,10 +1,11 @@
 import time
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QPushButton, QLabel, QTextEdit, QMessageBox
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QTextEdit, QMessageBox
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QMouseEvent
 from logic import load_texts, calculate_speed
-from styles import MAIN_STYLE, INCORRECT_INPUT_STYLE, CORRECT_INPUT_STYLE, HIGHLIGHTED_TARGET_TEXT_STYLE
+from styles import MAIN_STYLE, INCORRECT_INPUT_STYLE, CORRECT_INPUT_STYLE, HIGHLIGHTED_TARGET_TEXT_STYLE, SYSTEM_MENU_STYLE
 
 
 class TypingTrainerGUI(QWidget):
@@ -14,15 +15,19 @@ class TypingTrainerGUI(QWidget):
         self.current_text = ""
         self.remaining_text = ""
         self.start_time = None
+        self.drag_position = None
 
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("Typing Trainer")
+        self.setWindowFlags(Qt.FramelessWindowHint)
         self.setGeometry(100, 100, 600, 400)
-        self.setStyleSheet(MAIN_STYLE)
+        self.setStyleSheet(MAIN_STYLE + SYSTEM_MENU_STYLE)
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.create_system_menu(layout)
 
         self.instruction_label = QLabel("Select a difficulty level:")
         layout.addWidget(self.instruction_label, alignment=Qt.AlignCenter)
@@ -55,6 +60,49 @@ class TypingTrainerGUI(QWidget):
         layout.addWidget(self.speed_label, alignment=Qt.AlignCenter)
 
         self.setLayout(layout)
+
+    def create_system_menu(self, parent_layout):
+        system_menu = QHBoxLayout()
+        system_menu.setContentsMargins(5, 5, 5, 5)
+        system_menu.setSpacing(5)
+
+        minimize_button = QPushButton()
+        minimize_button.setObjectName("minimizeButton")
+        minimize_button.setFixedSize(12, 12)
+        minimize_button.clicked.connect(self.showMinimized)
+
+        maximize_button = QPushButton()
+        maximize_button.setObjectName("maximizeButton")
+        maximize_button.setFixedSize(12, 12)
+        maximize_button.clicked.connect(self.toggle_maximize_restore)
+
+        close_button = QPushButton()
+        close_button.setObjectName("closeButton")
+        close_button.setFixedSize(12, 12)
+        close_button.clicked.connect(self.close)
+
+        system_menu.addStretch()
+        system_menu.addWidget(minimize_button, alignment=Qt.AlignCenter)
+        system_menu.addWidget(maximize_button, alignment=Qt.AlignCenter)
+        system_menu.addWidget(close_button, alignment=Qt.AlignCenter)
+
+        parent_layout.addLayout(system_menu)
+
+    def toggle_maximize_restore(self):
+        if self.isMaximized():
+            self.showNormal()
+        else:
+            self.showMaximized()
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.LeftButton:
+            self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if event.buttons() == Qt.LeftButton and self.drag_position:
+            self.move(event.globalPos() - self.drag_position)
+            event.accept()
 
     def start_training(self, difficulty):
         self.current_text = self.texts[difficulty][0]
